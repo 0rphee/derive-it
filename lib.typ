@@ -1,13 +1,13 @@
 /* 
 
-`dedNat` is a function that expects 2 parameters:
+`ded-nat` is a function that expects 2 parameters:
 - `stcolor`: the stroke color of the indentation guides. Default is `black`.
 - `arr`: an array with the shape, it can be provided in two shapes.
     - 4 items: (dependency: text content, indentation: integer starting from 0, formula: text content, rule: text content).
     - 3 items: the same as above, but without the dependency.
 
 */
-#let dedNat(stcolor: black,  arr: array) = context {
+#let ded-nat(stcolor: black,  arr: array) = context {
   let strart = ( top: 0em, right: 0em, bottom: 0em,left: 1pt + stcolor  )
   let strend = ( top: 0em, right: 0em, bottom: 1pt + stcolor, left: 1pt + stcolor )
 
@@ -94,19 +94,19 @@
 
 /*
 
-`dedNatBoxed` is a function that expects 4 parameters, and returns the deduction in a `box`:
+`ded-nat-boxed` is a function that expects 4 parameters, and returns the deduction in a `box`:
 - `stcolor`: the stroke color of the indentation guides. Default is `black`.
-- `premisesAndConclusion`: bool, whether to automatically insert or not the premises and conclusion of the derivation above the lines. Default is `true`.
-- `premiseRuleText`: text content, used for finding the premises' formulas when `premisesAndConclusion` is set to `true`. Default is `"PR"`.
+- `premises-and-conclusion`: bool, whether to automatically insert or not the premises and conclusion of the derivation above the lines. Default is `true`.
+- `premise-rule-text`: text content, used for finding the premises' formulas when `premises-and-conclusion` is set to `true`. Default is `"PR"`.
 - `arr`: an array with the shape, it can be provided in two shapes.
     - 4 items: (dependency: text content, indentation: integer starting from 0, formula: text content, rule: text content).
     - 3 items: the same as above, but without the dependency.
 
 */
-#let dedNatBoxed(stcolor: black, premisesAndConclusion: true, premiseRuleText: "PR", arr: array) ={
+#let ded-nat-boxed(stcolor: black, premises-and-conclusion: true, premise-rule-text: "PR", arr: array) ={
   let premConcText = ""
-  if premisesAndConclusion {
-    let premises = arr.filter( x => x.last() == premiseRuleText).map(x => x.at(2))
+  if premises-and-conclusion {
+    let premises = arr.filter( x => x.last() == premise-rule-text).map(x => x.at(2))
     let conclusion = arr.last().at(2)
     let joinedPremises = [#premises.join([$, $ #linebreak()] ) #linebreak()]
 
@@ -123,7 +123,7 @@
   )[
    #align(center)[
       #premConcText
-      #dedNat(stcolor: stcolor, arr: arr)
+      #ded-nat(stcolor: stcolor, arr: arr)
     ]
   ]
 }

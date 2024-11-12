@@ -16,10 +16,10 @@ Elegir 10 ejercicios del libro de Falguera y Vidal, de las páginas 318, 319, 32
 
 + pg. 318, ejercicios VI, I. 1)
 
-  This is written using `dedNatBoxed`. The coloring of the text is done by wrapping that function with `text(content, weight: "bold", fill: gradient.linear(red, blue))`, and the color of the box stroke is done with `stcolor: gradient.linear(red, blue)`.
+  This is written using `ded-nat-boxed`. The coloring of the text is done by wrapping that function with `text(content, weight: "bold", fill: gradient.linear(red, blue))`, and the color of the box stroke is done with `stcolor: gradient.linear(red, blue)`.
 
   #hi[
-    #dedNatBoxed(stcolor: gradient.linear(red, blue), arr:(
+    #ded-nat-boxed(stcolor: gradient.linear(red, blue), arr:(
         ("1", 0, $forall x (P x) and forall x (Q x)$, "PR"),
         ("2", 0, $forall x (P x -> R x)$, "PR"),
         
@@ -32,9 +32,9 @@ Elegir 10 ejercicios del libro de Falguera y Vidal, de las páginas 318, 319, 32
     ))
   ]
 
-  This is using `dedNat`, and it is a repetition of the last one but without the boxing and without dependencies (inputting an array of 3 items).
+  This is using `ded-nat`, and it is a repetition of the last one but without the boxing and without dependencies (inputting an array of 3 items).
 
-  #dedNat(stcolor: black, arr: (
+  #ded-nat(stcolor: black, arr: (
     (0, $forall x (P x) and forall x (Q x)$, "PR"),
     (0, $forall x (P x -> R x)$, "PR"),
   
@@ -45,9 +45,9 @@ Elegir 10 ejercicios del libro de Falguera y Vidal, de las páginas 318, 319, 32
     (0, $forall x (R x)$, "GU 6"),
   ))
 
-  This is using `dedNatBoxed`, without dependencies (inputting an array of 3 items) and without the premises and conclusion of the deduction automatically put over the lines.
+  This is using `ded-nat-boxed`, without dependencies (inputting an array of 3 items) and without the premises and conclusion of the deduction automatically put over the lines.
 
-  #dedNatBoxed(stcolor: black, premisesAndConclusion: false, arr: (
+  #ded-nat-boxed(stcolor: black, premises-and-conclusion: false, arr: (
     (0, $forall x (P x) and forall x (Q x)$, "PR"),
     (0, $forall x (P x -> R x)$, "PR"),
   
@@ -60,7 +60,7 @@ Elegir 10 ejercicios del libro de Falguera y Vidal, de las páginas 318, 319, 32
 
 + pg. 321, ejercicios VI, I. 62)
 
-  #dedNatBoxed(stcolor: black, arr: (
+  #ded-nat-boxed(stcolor: black, arr: (
     ("1", 0, $forall x (S x b) and not forall y (P y -> Q b y)$, "PR"),
     ("2", 0, $forall x forall y (Q x y -> not Q y x)$, "PR"),
 
@@ -112,7 +112,7 @@ Elegir 10 ejercicios del libro de Falguera y Vidal, de las páginas 318, 319, 32
         tack forall x ((S a and S b) -> (R a b x -> not Q x))
         $
       
-      #dedNat(stcolor: gradient.linear(red,blue), arr: (
+      #ded-nat(stcolor: gradient.linear(red,blue), arr: (
         ("1", 0, $not (M a b -> (S a and S b))$, "PR"),
         ("2", 0, $not (not exists x Q x or forall x not R a b x)$, "PR"),
         
@@ -145,7 +145,7 @@ Elegir 10 ejercicios del libro de Falguera y Vidal, de las páginas 318, 319, 32
 #pagebreak()
 4. pg. 320, ejercicios VI, I. 41)
 
-  #dedNatBoxed(stcolor: black, arr: (
+  #ded-nat-boxed(stcolor: black, arr: (
     ("1", 0, $forall x forall y ((Q y x and R y x) -> not Q x y)$, "PR"),
     ("2", 0, $Q a b and P b$, "PR"),
   
@@ -180,7 +180,7 @@ Elegir 10 ejercicios del libro de Falguera y Vidal, de las páginas 318, 319, 32
         tack exists x (Q x and R x)
         $
       
-      #dedNat(stcolor: gradient.linear(red,blue), arr: (
+      #ded-nat(stcolor: gradient.linear(red,blue), arr: (
         ("1", 0, $not ex x ex y ( not T x y and not T y x)$, "PR"),
         ("2", 0, $forall x (T x a -> (Q a and R a))$, "PR"),
         ("3", 0, $not forall x (T a x)$, "PR"),
@@ -220,7 +220,7 @@ Elegir 10 ejercicios del libro de Falguera y Vidal, de las páginas 318, 319, 32
         tack R b
         $
       
-      #dedNat(stcolor: gradient.linear(red,blue), arr: (
+      #ded-nat(stcolor: gradient.linear(red,blue), arr: (
         ("1", 0, $not ex x (S x) or (Q a and T a)$, "PR"),
         ("2", 0, $ex x (Q x and T x) -> forall x (R x)$, "PR"),
         ("3", 0, $S a$, "PR"),
@@ -251,7 +251,7 @@ Elegir 10 ejercicios del libro de Falguera y Vidal, de las páginas 318, 319, 32
         ex x ( not P x and Q x)
         $
       
-      #dedNat(stcolor: gradient.linear(red,blue), arr: (
+      #ded-nat(stcolor: gradient.linear(red,blue), arr: (
         ("1", 0, $forall x (T x -> Q x)$, "PR"),
         ("2", 0, $forall x not (P x or not T x)$, "PR"),
         
@@ -274,7 +274,7 @@ Elegir 10 ejercicios del libro de Falguera y Vidal, de las páginas 318, 319, 32
 8. pg. 318, ejercicios VI, I. 5)
 
   #hi[
-    #dedNatBoxed(stcolor: gradient.linear(red, blue), arr: (
+    #ded-nat-boxed(stcolor: gradient.linear(red, blue), arr: (
         ("1", 0, $forall x (P x) -> forall x (Q x)$, "PR"),
         ("2", 0, $not Q a$, "PR"),
         
@@ -288,7 +288,7 @@ Elegir 10 ejercicios del libro de Falguera y Vidal, de las páginas 318, 319, 32
 + pg. 318, ejercicios VI, I. 6)
 
   #hi[
-    #dedNatBoxed(stcolor: gradient.linear(red, blue), arr: (
+    #ded-nat-boxed(stcolor: gradient.linear(red, blue), arr: (
         ("1", 0, $forall x (P x -> Q x)$, "PR"),
         ("2", 0, $forall x ( not S x -> not Q x)$, "PR"),
         ("3", 0, $not forall x (S x)$, "PR"),
@@ -308,7 +308,7 @@ Elegir 10 ejercicios del libro de Falguera y Vidal, de las páginas 318, 319, 32
 #pagebreak()
 10. pg. 318, ejercicios VI, I. 7)
 
-  #dedNatBoxed(stcolor: black, arr: (
+  #ded-nat-boxed(stcolor: black, arr: (
       ("1", 0, $forall x (T x -> M x)$, "PR"),
       ("2", 0, $forall x not (M x and R x)$, "PR"),
       ("3", 0, $forall x ( T x -> (P x -> R x))$, "PR"),
