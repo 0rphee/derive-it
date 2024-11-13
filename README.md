@@ -8,16 +8,16 @@ A Typst package to create Fitch-style natural deductions.
 
 This package provides two functions:
 
-`dedNat` is a function that expects 2 parameters:
+`ded-nat` is a function that expects 2 parameters:
 - `stcolor`: the stroke color of the indentation guides. The default is `black`.
 - `arr`: an array with the shape, it can be provided in two shapes.
     - 4 items: (dependency: text content, indentation: integer starting from 0, formula: text content, rule: text content).
     - 3 items: the same as above, but without the dependency.
 
-`dedNatBoxed` is a function that expects 4 parameters, and returns the deduction in a `box`:
+`ded-nat-boxed` is a function that expects 4 parameters, and returns the deduction in a `box`:
 - `stcolor`: the stroke color of the indentation guides. The default is `black`.
-- `premisesAndConclusion`: bool, whether to automatically insert or not the premises and conclusion of the derivation above the lines. The default is `true`.
-- `premiseRuleText`: text content, used for finding the premises' formulas when `premisesAndConclusion` is set to `true`. The default is `"PR"`.
+- `premises-and-conclusion`: bool, whether to automatically insert or not the premises and conclusion of the derivation above the lines. The default is `true`.
+- `premise-rule-text`: text content, used for finding the premises' formulas when `premises-and-conclusion` is set to `true`. The default is `"PR"`.
 - `arr`: an array with the shape, it can be provided in two shapes.
     - 4 items: (dependency: text content, indentation: integer starting from 0, formula: text content, rule: text content).
     - 3 items: the same as above, but without the dependency.
@@ -25,9 +25,9 @@ This package provides two functions:
 ### Example
 
 ```typ
-#import "@preview/derive-it:0.1.0": *
+#import "@preview/derive-it:0.1.1": *
 
-#dedNat(stcolor: black, arr:(
+#ded-nat(stcolor: black, arr:(
     ("1", 0, $forall x (P x) and forall x (Q x)$, "PR"),
     ("2", 0, $forall x (P x -> R x)$, "PR"),
   
@@ -39,7 +39,7 @@ This package provides two functions:
     ("1,2", 0, $forall x (R x)$, "GU 6"),
 ))
 
-#dedNatBoxed(stcolor: black, premisesAndConclusion: false, arr: (
+#ded-nat-boxed(stcolor: black, premises-and-conclusion: false, arr: (
   ("1", 0, $forall x (S x b) and not forall y (P y -> Q b y)$, "PR"),
   ("2", 0, $forall x forall y (Q x y -> not Q y x)$, "PR"),
     ("3", 1, $not forall x (not P x) -> forall y (S y b -> Q b y)$, "Sup. RAA"),
