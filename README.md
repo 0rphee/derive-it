@@ -1,6 +1,6 @@
 # derive-it
 
-A Typst package to create Fitch-style natural deductions.
+A Typst package to create Fitch-style natural deductions. Available on [Typst Universe](https://typst.app/universe/package/derive-it).
 
 ![Image of output](examples/example.png)
 
