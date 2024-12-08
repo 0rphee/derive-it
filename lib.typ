@@ -39,7 +39,7 @@
       arr.at(i+1).at(ix)
       } < indent)
 
-    let bl = [#formula #h(2em) /*#rule*/]
+    let bl = formula
     
     for i in range(0, indent){
       let inset = if i != 0 {0pt} else {0pt}
@@ -52,7 +52,7 @@
         inset = -5pt
       } 
       
-      bl = [#h(1em) #box(inset: inset)[#rect(stroke: str)[ #bl ]]]
+      bl = [#h(1em) #box(inset: inset)[#rect(stroke: str)[#bl]]]
     }
     let index = box(width: 1.5em,)[#(i+1).]
 
@@ -74,14 +74,15 @@
 
     let line = ""
     if hasDependencies {
-      line = box(inset: ins)[ #box(inset: numInset)[#dependency #index] #bl]
+      line = box(inset: ins)[#box(inset: numInset)[#dependency #index] #bl]
     } else {
-      line = box(inset: ins)[ #box(inset: numInset)[#index] #bl]
+      line = box(inset: ins)[#box(inset: numInset)[#index] #bl]
     }
     
+    rule = box(baseline: -0.5em , rule)
     tupArr.push((line, rule))
   }
-  tupArr = tupArr.map(a => [#box(width: maxWidth + 0em, a.at(0)) #a.at(1)])
+  tupArr = tupArr.map(a => [#box(width: maxWidth + 0em, a.at(0)) #h(1em) #a.at(1)])
 
   text(weight: "bold",
     block(
@@ -108,22 +109,17 @@
   if premises-and-conclusion {
     let premises = arr.filter( x => x.last() == premise-rule-text).map(x => x.at(2))
     let conclusion = arr.last().at(2)
-    let joinedPremises = [#premises.join([$, $ #linebreak()] ) #linebreak()]
-
-    premConcText = [
-      $
-      #joinedPremises
-      tack #conclusion
-      $
-    ]  
+    let joinedPremises = [#premises.join([$, $ \ ] )]
+    premConcText = [ $\ #joinedPremises \ tack #conclusion$ ]  
   }
   
   box(
     stroke: stcolor, inset: 8pt, radius: 8pt
   )[
    #align(center)[
-      #premConcText
-      #ded-nat(stcolor: stcolor, arr: arr)
+      #if premises-and-conclusion {
+        premConcText
+      } #ded-nat(stcolor: stcolor, arr: arr)
     ]
   ]
 }
