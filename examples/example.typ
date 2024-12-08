@@ -22,9 +22,10 @@ Elegir 10 ejercicios del libro de Falguera y Vidal, de las páginas 318, 319, 32
     #ded-nat-boxed(stcolor: gradient.linear(red, blue), arr:(
         ("1", 0, $forall x (P x) and forall x (Q x)$, "PR"),
         ("2", 0, $forall x (P x -> R x)$, "PR"),
-        
+        (lorem(20)),
         ("1", 0, $forall x (P x)$, "S 1"),
         ("1", 0, $P a$, "IU 3"),
+        (lorem(30)),
         ("2", 0, $P a -> R a$, "IU 2"),
         ("1,2", 0, $R a$, "MP 4, 5"),
         
@@ -41,6 +42,7 @@ Elegir 10 ejercicios del libro de Falguera y Vidal, de las páginas 318, 319, 32
     (0, $forall x (P x)$, "S 1"),
     (0, $P a$, "IU 3"),
     (0, $P a -> R a$, "IU 2"),
+    (lorem(20)),
     (0, $R a$, "MP 4, 5"),
     (0, $forall x (R x)$, "GU 6"),
   ))
