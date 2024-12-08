@@ -6,22 +6,27 @@ A Typst package to create Fitch-style natural deductions. Available on [Typst Un
 
 ## Usage
 
+> More usage examples provided in the [examples directory of the repository](https://github.com/0rphee/derive-it/tree/commentary/examples).
+
 This package provides two functions:
 
 `ded-nat` is a function that expects 2 parameters:
 - `stcolor`: the stroke color of the indentation guides. The default is `black`.
-- `arr`: an array with the shape, it can be provided in two shapes.
+- `arr`: an array that can be provided in two shapes:
     - 4 items: (dependency: text content, indentation: integer starting from 0, formula: text content, rule: text content).
     - 3 items: the same as above, but without the dependency.
+    - Additionally, for both the 4 & 3 item variants, it is possible to insert "comment lines", of just 1 text item like the following example:
+      - `#ded-nat(arr: ((0, $P -> Q$, "PR"), ("After the premise"), (0, $P$, "PR"))`
 
 `ded-nat-boxed` is a function that expects 4 parameters, and returns the deduction in a `box`:
 - `stcolor`: the stroke color of the indentation guides. The default is `black`.
 - `premises-and-conclusion`: bool, whether to automatically insert or not the premises and conclusion of the derivation above the lines. The default is `true`.
 - `premise-rule-text`: text content, used for finding the premises' formulas when `premises-and-conclusion` is set to `true`. The default is `"PR"`.
-- `arr`: an array with the shape, it can be provided in two shapes.
+- `arr`: an array that can be provided in two shapes:
     - 4 items: (dependency: text content, indentation: integer starting from 0, formula: text content, rule: text content).
     - 3 items: the same as above, but without the dependency.
-
+    - Additionally, for the 4 & 3 item variants, it is possible to insert "comment lines", of just 1 text item like the following example:
+      - `#ded-nat-boxed(arr: (("1", 0, $P -> Q$, "PR"), ("After the premise"), ("1", 0, $P$, "PR"))`
 ### Example
 
 ```typ
