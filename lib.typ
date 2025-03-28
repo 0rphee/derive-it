@@ -1,4 +1,4 @@
-/* 
+/*
 
 `ded-nat` is a function that expects 2 parameters:
 - `stcolor`: the stroke color of the indentation guides. Default is `black`.
@@ -7,12 +7,73 @@
     - 3 items: the same as above, but without the dependency.
 
 */
+
+
+// internal function that stringifies a line array (of a natural deduction table)
+// this may be removed at any time
+#let derive-it-internal-stringify-line(line-arr) = {
+  let to-string(cntnt) = {
+    if type(cntnt) != content {
+      str(cntnt)
+    } else if cntnt.has("text") {
+      cntnt.text
+    } else if cntnt.has("children") {
+      cntnt.children.map(to-string).join("")
+    } else if cntnt.has("body") {
+      to-string(cntnt.body)
+    } else if cntnt == [ ] {
+      " "
+    }
+  }
+
+  if type(line-arr) == str or type(line-arr) == int or type(line-arr) == float {
+    str(line-arr)
+  } else if type(line-arr) == array{
+    line-arr.map(to-string).intersperse(", ").sum()  
+  } else {
+    repr(line-arr)
+  }
+}
+
+// internal function to validate that each line given by the user is correct, with a descriptive error otherwise
+// this may be removed at any time
+#let derive-it-internal-validate-line(line, line-num, line-size: none) = {
+  let line-text = "[At line: " + str(line-num+1) + "]: "
+  let stringified = "'" + derive-it-internal-stringify-line(line) + "'"
+  let ty = type(line)
+  if ty != array {
+    panic(line-text + "Line is a '" + ty + "' instead of an array of 3 or 4 elements: " + stringified)
+  } else {
+    // if the linesize is not the provided in the arguments or its not 3 or 4
+    if (line-size != none) and (line.len() != line-size){
+      panic(line-text + "Line (array) has an incorrect number of elements: " + str(line.len()) + ". It should have " + str(line-size) + ": " + stringified)
+    } else if line-size == none and (line.len() != 3 and line.len() != 4) {
+      panic(line-text + "Line (array) has an incorrect number of elements: " + str(line.len()) + ". It should have 3 or 4 elements: "+ stringified)
+    }
+
+    let ruleVal = line.last()
+    if type(ruleVal) != str and type(ruleVal) != content {
+      panic(line-text + "Line (array) should receive a 'string' or 'content' as the rule, instead it received '" + type(ruleVal) + "': " + stringified)
+    }
+
+    let indentVal = if line.len() == 3 {
+      line.at(0)
+    } else {
+      line.at(1)
+    }
+    if type(indentVal) != int {
+      panic( line-text + "Line (array) should receive an 'integer' as the indentation, instead it received '" + type(indentVal) + "': " + stringified)
+    }
+  }
+}
+
+
 #let ded-nat(stcolor: black,  arr: array) = context {
   let strart = ( top: 0em, right: 0em, bottom: 0em,left: 1pt + stcolor  )
   let strend = ( top: 0em, right: 0em, bottom: 1pt + stcolor, left: 1pt + stcolor )
 
   // check if the first line's array has 4 items (w/dependencies) or not
-  let hasDependencies = if arr.at(0).len() == 4 {true} else {false}
+  let (hasDependencies, lineSize) = if arr.at(0).len() == 4 {(true, 4)} else {(false, 3)}
 
   let maxDepWidth = if hasDependencies {
       arr.fold(0pt, (accum, it) => {
@@ -27,6 +88,10 @@
   let tupArr = ()
   
   for (i, line) in arr.enumerate(start: 0) {
+    if i == 0 {
+      derive-it-internal-validate-line(line, i+1)
+    }
+
     let (dep, indent, formula, rule) = if hasDependencies {
       line
     } else {
@@ -36,7 +101,9 @@
 
     let isLastIndented = (arr.len() > i+1) and ({
       let ix = if hasDependencies {1} else {0}
-      arr.at(i+1).at(ix)
+      let next-line = arr.at(i+1)
+      derive-it-internal-validate-line(next-line, i+1, line-size: lineSize)
+      next-line.at(ix) 
       } < indent)
 
     let bl = formula
