@@ -22,6 +22,15 @@ This package provides two functions:
     - 4 items: (dependency: text content, indentation: integer starting from 0, formula: text content, rule: text content).
     - 3 items: the same as above, but without the dependency.
 
+
+> Note: depending on your layout, this functions may fail to compile due to a high enough amount of indentation (due to the recursive implementation of the layout).
+> In my tests, depending on the content of the line, the compiler will panic at around 15-20 indentation levels.
+> ```typst
+>     ("1", 16, $forall y ((Q y a and R y a) -> not Q a y)$, "TEST")
+> ```
+> ![Image of rendered test](examples/indentation-test.png)
+
+
 ### Example
 
 ```typ
