@@ -40,7 +40,7 @@ This package provides two functions:
 ### Example
 
 ```typ
-#import "@preview/derive-it:0.1.3": *
+#import "@preview/derive-it:1.0.0": *
 
 #ded-nat(stcolor: black, arr:(
     ("1", 0, $forall x (P x) and forall x (Q x)$, "PR"),
