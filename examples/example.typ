@@ -11,7 +11,27 @@
   text(content, weight: "bold", fill: gradient.linear(red, blue))
 }
 
-= Deducción natural
+= Examples
+
+Default usage of `ded-nat-boxed`:
+
+#ded-nat-boxed(stcolor: black, arr:(
+  ("1", 0, "first line", "PR"),
+  ("1", 0, "second line", "PR"),
+  ("1", 0, "third line" , "PR"),
+  ("1", 0, text(weight: "bold", "fourth line") , "PR"),
+))
+
+Usage of `ded-nat-boxed` with overriden `style-dep`, `style-formula` and `style-rule` parameters:
+
+#ded-nat-boxed(style-dep: a => text(weight: "extrabold", fill: red, a), style-formula: a => text(fill: fuchsia, a), style-rule: a => text(weight: "extralight", style: "italic", fill: olive, tracking: 6pt, a), arr:(
+  ("1", 0, "first line", "PR"),
+  ("1", 0, "second line", "PR"),
+  ("1", 0,  "third line" , "PR"),
+  ("1", 0,  text(fill: blue, weight: "bold", "fourth line") , "PR"),
+))
+
+== Deducción natural
 Elegir 10 ejercicios del libro de Falguera y Vidal, de las páginas 318, 319, 320 y 321; y hacer su prueba con deducción natural. 
 
 + pg. 318, ejercicios VI, I. 1)
