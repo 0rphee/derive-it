@@ -202,26 +202,28 @@
 
     let bl = formula
 
+    ///////////////////////// FOR /////////////////////////////
     for indent-index in range(0, max-indent-level + 1) {
       let stroke = (top: 0pt, right: 0pt, bottom: 0pt, left: 0pt)
       let strength = if (indent >= max-indent-level - indent-index) {
         1pt
       } else { 0.0pt } // 'else' branch for debugging
       // current level of indentation needs box stroke
-      let stroke-left-right = strength + stcolor
+      let stroke-line-config = strength + stcolor
+
       if (indent == (max-indent-level - indent-index)) {
         // we're in the box that corresponds to the indentation of this formula
         if prev-indentation-diff <= -1 {
           // if the previous formula is in a lower indentation level
-          stroke.top = strength + stcolor
+          stroke.top = stroke-line-config
         }
         if next-indentation-diff <= -1 {
           // if the next formula is in a lower indentation level
-          stroke.bottom = strength + stcolor
+          stroke.bottom = stroke-line-config
         }
       }
-      stroke.left = stroke-left-right
-      stroke.right = stroke-left-right
+      stroke.left = stroke-line-config
+      stroke.right = stroke-line-config
 
       let rect-width = if (indent-index == 0) {
         max-formula-width + 10pt // 5pt each for left & right
@@ -239,17 +241,18 @@
         width: rect-width,
       )[#bl]]]
     }
+    ///////////////////////// FOR /////////////////////////////
 
-    let index = box(width: 1.5em)[#(i + 1).]
+    let line-index-content = box(width: 1.5em)[#(i + 1).]
 
     let numInset = (x: 0pt, y: 5pt)
     let line = if has-dependencies {
       let dependency = box(width: max-dep-width + 1em)[#dep]
-      let l =  box[#box(inset: numInset)[#dependency #index] #bl]
+      let l = box[#box(inset: numInset)[#dependency #line-index-content] #bl]
       maxWidth = calc.max(maxWidth, measure(l).width)
       l
     } else {
-      let l =  box[#box(inset: numInset)[#index] #bl]
+      let l = box[#box(inset: numInset)[#line-index-content] #bl]
       maxWidth = calc.max(maxWidth, measure(l).width)
       l
     }
@@ -258,10 +261,7 @@
     tupArr.push((line, rule, indent))
     i += 1
   }
-  tupArr = tupArr.map(a => [#box(width: maxWidth, a.at(0)) #h(
-      1em,
-    ) #a.at(1)
-  ])
+  tupArr = tupArr.map(a => [#box(width: maxWidth, a.at(0)) #h(1em) #a.at(1)])
 
   block(
     align(
@@ -278,21 +278,17 @@
   style-dep: derive-it-internal-default-style-dep,
   style-formula: derive-it-internal-default-style-formula,
   style-rule: derive-it-internal-default-style-rule,
+  nested-boxes: false,
 ) = context {
   assert(type(arr) == array, message: "The input must be an array.")
-  let strart = (top: 0em, right: 0em, bottom: 0em, left: 1pt + stcolor)
-  let strend = (
-    top: 0em,
-    right: 0em,
-    bottom: 1pt + stcolor,
-    left: 1pt + stcolor,
-  )
 
   // validate the input and obtain metrics
   let (
     has-dependencies,
     line-size,
     max-dep-width,
+    max-indent-level,
+    max-formula-width,
     arr,
   ) = derive-it-internal-array-checks(arr, style-dep, style-formula, style-rule)
 
@@ -305,72 +301,109 @@
     }
     let (dep, indent, formula, rule) = arr.at(i)
 
-    let isLastIndented = (
-      (arr.len() > i + 1)
-        and (
-          {
-            let ix = if has-dependencies { 1 } else { 0 }
-            arr.at(i + 1).at(ix)
-          }
-            < indent
-        )
-    )
+    // +1 -> more indented
+    // -1 -> less indented
+    // 0  -> equally indented
+    let prev-indentation-diff = if (i == 0) { -1 } else {
+      // previous line arrays always have 4 elements (dep=none)
+      arr.at(i - 1).at(1) - indent
+    }
+    let next-indentation-diff = if (arr.len() <= i + 1) { -1 } else {
+      let ix = if has-dependencies { 1 } else { 0 }
+      arr.at(i + 1).at(ix) - indent
+    }
 
     let bl = formula
 
-    for i in range(0, indent) {
-      let inset = if i != 0 { 0pt } else { 0pt }
+    ///////////////////////// FOR /////////////////////////////
+    let indent-index-top-range = if nested-boxes { max-indent-level + 1 } else {
+      indent
+    }
+    for indent-index in range(0, indent-index-top-range) {
+      let stroke = (top: 0pt, right: 0pt, bottom: 0pt, left: 0pt)
+      let strength = if (
+        (indent >= max-indent-level - indent-index) or not nested-boxes
+      ) {
+        1pt
+      } else { 0.0pt } // 'else' branch for debugging
+      let stroke-line-config = strength + stcolor
 
-      let str = if i == 0 and isLastIndented {
-        strend
-      } else { strart }
-
-      if indent > 0 and i < indent - 1 {
-        inset = -5pt
+      if nested-boxes {
+        if (indent == (max-indent-level - indent-index)) {
+          // we're in the box that corresponds to the indentation of this formula
+          if prev-indentation-diff <= -1 {
+            // if the previous formula is in a lower indentation level
+            stroke.top = stroke-line-config
+          }
+          if next-indentation-diff <= -1 {
+            // if the next formula is in a lower indentation level
+            stroke.bottom = stroke-line-config
+          }
+        }
+        stroke.left = stroke-line-config
+        stroke.right = stroke-line-config
+      } else {
+        if next-indentation-diff == -1 and indent-index == 0 {
+          stroke.bottom = stroke-line-config
+        }
+        stroke.left = stroke-line-config
       }
 
-      bl = [#h(1em) #box(inset: inset)[#rect(stroke: str)[#bl]]]
+      let rect-width = if nested-boxes and (indent-index == 0) {
+        max-formula-width + 10pt // 5pt each for left & right
+      } else {
+        auto
+      }
+
+      let external-box-inset = if nested-boxes {
+        if (indent-index != max-indent-level) {
+          (x: 1em)
+        } else {
+          (left: 0em)
+        }
+      } else {
+        (left: 1em)
+      }
+
+      let rect-inset = if indent-index == 0 { 5pt } else { 0pt }
+      bl = box(stroke: 0.1pt+blue, inset: external-box-inset, rect(
+        stroke: stroke,
+        inset: rect-inset,
+        width: rect-width,
+        bl,
+      ))
     }
+    ///////////////////////// FOR /////////////////////////////
 
-    let index = box(width: 1.5em)[#(i + 1).]
-    let tmpWidth = 0pt
-    let dependency = ""
-
-    if has-dependencies {
-      dependency = box(width: max-dep-width + 1em)[#dep]
-      tmpWidth = measure[#dependency #index #bl].width
+    let line-index-content = box(width: 1.5em)[#(i + 1).]
+    let (ins, numInset) = if not nested-boxes and indent == 0 {
+      ((y: 0.5em), 0pt)
     } else {
-      tmpWidth = measure[#index #bl].width
+      (0pt, (y: 5pt))
     }
-
-    if tmpWidth > maxWidth {
-      maxWidth = tmpWidth
-    }
-
-    let ins = if indent == 0 { (x: 0pt, y: 0.5em) } else { (x: 0pt, y: 0pt) }
-    let numInset = if indent == 0 { (x: 0pt, y: 0.0pt) } else {
-      (x: 0pt, y: 5pt)
-    }
-
-    let line = ""
-    if has-dependencies {
-      line = box(inset: ins)[#box(inset: numInset)[#dependency #index] #bl]
+    let line = if has-dependencies {
+      let dependency = box(width: max-dep-width + 1em)[#dep]
+      let l = box(inset: ins)[#box(
+          inset: numInset,
+        )[#dependency #line-index-content] #bl]
+      maxWidth = calc.max(maxWidth, measure(l).width)
+      l
     } else {
-      line = box(inset: ins)[#box(inset: numInset)[#index] #bl]
+      let l = box(inset: ins)[#box(inset: numInset)[#line-index-content] #bl]
+      maxWidth = calc.max(maxWidth, measure(l).width)
+      l
     }
 
     rule = box(baseline: -0.5em, rule)
     tupArr.push((line, rule))
     i += 1
   }
-  tupArr = tupArr.map(a => [#box(width: maxWidth + 0em, a.at(0)) #h(1em) #a.at(
-      1,
-    )])
+  tupArr = tupArr.map(a => [#box(width: maxWidth, a.at(0)) #h(1em) #a.at(1)])
 
   block(
     align(
       start,
-      stack(dir: ttb, spacing: 0em, ..tupArr),
+      stack(..tupArr),
     ),
   )
 }
@@ -397,6 +430,7 @@
   style-dep: derive-it-internal-default-style-dep,
   style-formula: derive-it-internal-default-style-formula,
   style-rule: derive-it-internal-default-style-rule,
+  nested-boxes: false,
   arr: array,
 ) = {
   let premConcText = ""
@@ -422,6 +456,7 @@
         style-dep: style-dep,
         style-formula: style-formula,
         style-rule: style-rule,
+        nested-boxes: nested-boxes,
         arr: arr,
       )
     ]
