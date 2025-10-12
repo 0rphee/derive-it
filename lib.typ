@@ -171,12 +171,12 @@
 
   // validate the input and obtain metrics
   let (
-    has-dependencies: has-dependencies,
-    line-size: line-size,
-    max-dep-width: max-dep-width,
-    max-indent-level: max-indent-level,
-    max-formula-width: max-formula-width,
-    arr: arr,
+    has-dependencies,
+    line-size,
+    max-dep-width,
+    max-indent-level,
+    max-formula-width,
+    arr,
   ) = derive-it-internal-array-checks(arr, style-dep, style-formula, style-rule)
 
   let maxWidth = 0pt
@@ -192,47 +192,39 @@
     // -1 -> less indented
     // 0  -> equally indented
     let prev-indentation-diff = if (i == 0) { -1 } else {
+      // previous line arrays always have 4 elements (dep=none)
       arr.at(i - 1).at(1) - indent
     }
     let next-indentation-diff = if (arr.len() <= i + 1) { -1 } else {
       let ix = if has-dependencies { 1 } else { 0 }
       arr.at(i + 1).at(ix) - indent
     }
-    // previous line arrays always have 4 elements (dep=none)
-    let isFirstIndented = prev-indentation-diff == -1
-    let isLastIndented = next-indentation-diff == -1
 
     let bl = formula
 
     for indent-index in range(0, max-indent-level + 1) {
-      let inset = (top: 0pt, right: 0pt, bottom: 0pt, left: 0pt)
       let stroke = (top: 0pt, right: 0pt, bottom: 0pt, left: 0pt)
-      let strength = if (max-indent-level - indent-index <= indent) {
+      let strength = if (indent >= max-indent-level - indent-index) {
         1pt
-      } else { 0.1pt } // debugging lines
-      let tstr = strength + purple // debugging lines
-      if (max-indent-level - indent-index <= indent) {
-        // current level of indentation needs box stroke
-        tstr = strength + stcolor
-        if (
-          prev-indentation-diff <= -1
-            and (indent == (max-indent-level - indent-index))
-        ) {
+      } else { 0.0pt } // 'else' branch for debugging
+      // current level of indentation needs box stroke
+      let stroke-left-right = strength + stcolor
+      if (indent == (max-indent-level - indent-index)) {
+        // we're in the box that corresponds to the indentation of this formula
+        if prev-indentation-diff <= -1 {
+          // if the previous formula is in a lower indentation level
           stroke.top = strength + stcolor
         }
-        if (
-        (next-indentation-diff <= -1)
-            and (indent == (max-indent-level - indent-index))
-        ) {
+        if next-indentation-diff <= -1 {
+          // if the next formula is in a lower indentation level
           stroke.bottom = strength + stcolor
         }
       }
-      stroke.left = tstr
-      stroke.right = tstr
-      inset = if indent-index == 0 { 5pt } else { inset }
+      stroke.left = stroke-left-right
+      stroke.right = stroke-left-right
 
       let rect-width = if (indent-index == 0) {
-        max-formula-width + 10pt
+        max-formula-width + 10pt // 5pt each for left & right
       } else {
         auto
       }
@@ -241,50 +233,40 @@
         1em
       }
 
-      bl = [#h(extra-spacing) #box[#rect(
-          stroke: stroke,
-          inset: inset,
-          width: rect-width,
-        )[#bl]] #h(extra-spacing)]
+      bl = [#box(inset: (x: extra-spacing, y: 0pt))[#rect(
+        stroke: stroke,
+        inset: if indent-index == 0 { 5pt } else { 0pt },
+        width: rect-width,
+      )[#bl]]]
     }
 
     let index = box(width: 1.5em)[#(i + 1).]
-    let tmpWidth = 0pt
-    let dependency = ""
-
-    if has-dependencies {
-      dependency = box(width: max-dep-width + 1em)[#dep]
-      tmpWidth = measure[#dependency #index #bl].width
-    } else {
-      tmpWidth = measure[#index #bl].width
-    }
-    maxWidth = calc.max(maxWidth, tmpWidth)
 
     let numInset = (x: 0pt, y: 5pt)
-
-    let line = ""
-    if has-dependencies {
-      line = box[#box(inset: numInset)[#dependency #index] #bl]
+    let line = if has-dependencies {
+      let dependency = box(width: max-dep-width + 1em)[#dep]
+      let l =  box[#box(inset: numInset)[#dependency #index] #bl]
+      maxWidth = calc.max(maxWidth, measure(l).width)
+      l
     } else {
-      line = box[#box(inset: numInset)[#index] #bl]
+      let l =  box[#box(inset: numInset)[#index] #bl]
+      maxWidth = calc.max(maxWidth, measure(l).width)
+      l
     }
 
     rule = box(baseline: -0.5em, rule)
     tupArr.push((line, rule, indent))
     i += 1
   }
-  let v = 0.2pt + blue
-  let st = (right: v, left: v, top: v, bottom: v)
-  tupArr = tupArr.map(a => [#box(stroke: st, width: maxWidth, a.at(0)) #h(
+  tupArr = tupArr.map(a => [#box(width: maxWidth, a.at(0)) #h(
       1em,
-    ) #a.at(
-      1,
-    ) #h(1em) #text(fill: purple, [#a.at(2)])]) // TODO: REMOVE DEBUGGING
+    ) #a.at(1)
+  ])
 
   block(
     align(
       start,
-      stack(dir: ttb, spacing: 0em, ..tupArr),
+      stack(..tupArr),
     ),
   )
 }

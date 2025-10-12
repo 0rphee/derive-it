@@ -16,13 +16,13 @@
 Default usage of `ded-nat-boxed`:
 
 #ded-nat-alt(arr:(
-  ("just", 0, $p -> (q -> r)$, "P"),
-  ("just", 1, $q$ , "P"),
-  ("just", 2, $p$ , "P"),
-  ("just", 2, $q -> r$ , $e->,3,1$),
-  ("just", 2, $r$, $e->,2,4$),
-  ("just", 1, $p -> r$, $i->,"3-5"$),
-  ("just", 0, $q -> (p -> r)$ , $i->,"2-6"$),
+  (0, $p -> (q -> r)$, "P"),
+  (1, $q$ , "P"),
+  (2, $p$ , "P"),
+  (2, $q -> r$ , $e->,3,1$),
+  (2, $r$, $e->,2,4$),
+  (1, $p -> r$, $i->,"3-5"$),
+  (0, $q -> (p -> r)$ , $i->,"2-6"$),
 ))
 
 #ded-nat-boxed(stcolor: black, arr:(
