@@ -15,6 +15,16 @@
 
 Default usage of `ded-nat-boxed`:
 
+#ded-nat-alt(arr:(
+  ("just", 0, $p -> (q -> r)$, "P"),
+  ("just", 1, $q$ , "P"),
+  ("just", 2, $p$ , "P"),
+  ("just", 2, $q -> r$ , $e->,3,1$),
+  ("just", 2, $r$, $e->,2,4$),
+  ("just", 1, $p -> r$, $i->,"3-5"$),
+  ("just", 0, $q -> (p -> r)$ , $i->,"2-6"$),
+))
+
 #ded-nat-boxed(stcolor: black, arr:(
   ("1", 0, "first line", "PR"),
   ("1", 0, "second line", "PR"),
@@ -80,7 +90,7 @@ Elegir 10 ejercicios del libro de Falguera y Vidal, de las páginas 318, 319, 32
 
 + pg. 321, ejercicios VI, I. 62)
 
-  #ded-nat-boxed(stcolor: black, arr: (
+  #ded-nat-alt(stcolor: black, arr: (
     ("1", 0, $forall x (S x b) and not forall y (P y -> Q b y)$, "PR"),
     ("2", 0, $forall x forall y (Q x y -> not Q y x)$, "PR"),
 

@@ -115,37 +115,180 @@
   let (has-dependencies, line-size) = if arr.at(0).len() == 4 {
     (true, 4)
   } else { (false, 3) }
-  let n = 0
+  let i = 0
   let max-dep-width = 0pt
-  while n < arr.len() {
-    derive-it-internal-validate-line(arr.at(n), n + 1, line-size: line-size)
+  let max-indent-level = 0
+  let max-formula-width = 0pt
+  while i < arr.len() {
+    derive-it-internal-validate-line(arr.at(i), i + 1, line-size: line-size)
     if has-dependencies {
-      arr.at(n) = (
-        style-dep(arr.at(n).at(0)),
-        arr.at(n).at(1),
-        style-formula(arr.at(n).at(2)),
-        style-rule(arr.at(n).at(3)),
+      let styled-formula = style-formula(arr.at(i).at(2))
+      arr.at(i) = (
+        style-dep(arr.at(i).at(0)),
+        arr.at(i).at(1),
+        styled-formula,
+        style-rule(arr.at(i).at(3)),
       )
-      max-dep-width = {
-        let sz = measure[#arr.at(n).at(0)].width
-        if sz > max-dep-width { sz } else { max-dep-width }
-      }
+      max-formula-width = calc.max(
+        max-formula-width,
+        measure(styled-formula).width,
+      )
+      max-indent-level = calc.max(max-indent-level, arr.at(i).at(1))
+      max-dep-width = calc.max(measure[#arr.at(i).at(0)].width, max-dep-width)
     } else {
-      arr.at(n) = (
-        arr.at(n).at(0),
-        style-formula(arr.at(n).at(1)),
-        style-rule(arr.at(n).at(2)),
+      let styled-formula = style-formula(arr.at(i).at(1))
+      arr.at(i) = (
+        arr.at(i).at(0),
+        styled-formula,
+        style-rule(arr.at(i).at(2)),
       )
+      max-formula-width = calc.max(
+        max-formula-width,
+        measure(styled-formula).width,
+      )
+      max-indent-level = calc.max(max-indent-level, arr.at(i).at(0))
     }
-    n += 1
+    i += 1
   }
   return (
     max-dep-width: max-dep-width,
     has-dependencies: has-dependencies,
     line-size: line-size,
+    max-indent-level: max-indent-level,
+    max-formula-width: max-formula-width,
     arr: arr,
   )
 }
+
+#let ded-nat-alt(
+  stcolor: black,
+  arr: array,
+  style-dep: derive-it-internal-default-style-dep,
+  style-formula: derive-it-internal-default-style-formula,
+  style-rule: derive-it-internal-default-style-rule,
+) = context {
+  assert(type(arr) == array, message: "The input must be an array.")
+
+  // validate the input and obtain metrics
+  let (
+    has-dependencies: has-dependencies,
+    line-size: line-size,
+    max-dep-width: max-dep-width,
+    max-indent-level: max-indent-level,
+    max-formula-width: max-formula-width,
+    arr: arr,
+  ) = derive-it-internal-array-checks(arr, style-dep, style-formula, style-rule)
+
+  let maxWidth = 0pt
+  let tupArr = ()
+  let i = 0
+  while i < arr.len() {
+    if not has-dependencies {
+      arr.at(i).insert(0, none)
+    }
+    let (dep, indent, formula, rule) = arr.at(i)
+
+    // +1 -> more indented
+    // -1 -> less indented
+    // 0  -> equally indented
+    let prev-indentation-diff = if (i == 0) { -1 } else {
+      arr.at(i - 1).at(1) - indent
+    }
+    let next-indentation-diff = if (arr.len() <= i + 1) { -1 } else {
+      let ix = if has-dependencies { 1 } else { 0 }
+      arr.at(i + 1).at(ix) - indent
+    }
+    // previous line arrays always have 4 elements (dep=none)
+    let isFirstIndented = prev-indentation-diff == -1
+    let isLastIndented = next-indentation-diff == -1
+
+    let bl = formula
+
+    for indent-index in range(0, max-indent-level + 1) {
+      let inset = (top: 0pt, right: 0pt, bottom: 0pt, left: 0pt)
+      let stroke = (top: 0pt, right: 0pt, bottom: 0pt, left: 0pt)
+      let strength = if (max-indent-level - indent-index <= indent) {
+        1pt
+      } else { 0.1pt } // debugging lines
+      let tstr = strength + purple // debugging lines
+      if (max-indent-level - indent-index <= indent) {
+        // current level of indentation needs box stroke
+        tstr = strength + stcolor
+        if (
+          prev-indentation-diff <= -1
+            and (indent == (max-indent-level - indent-index))
+        ) {
+          stroke.top = strength + stcolor
+        }
+        if (
+        (next-indentation-diff <= -1)
+            and (indent == (max-indent-level - indent-index))
+        ) {
+          stroke.bottom = strength + stcolor
+        }
+      }
+      stroke.left = tstr
+      stroke.right = tstr
+      inset = if indent-index == 0 { 5pt } else { inset }
+
+      let rect-width = if (indent-index == 0) {
+        max-formula-width + 10pt
+      } else {
+        auto
+      }
+
+      let extra-spacing = if (indent-index == max-indent-level) { 0em } else {
+        1em
+      }
+
+      bl = [#h(extra-spacing) #box[#rect(
+          stroke: stroke,
+          inset: inset,
+          width: rect-width,
+        )[#bl]] #h(extra-spacing)]
+    }
+
+    let index = box(width: 1.5em)[#(i + 1).]
+    let tmpWidth = 0pt
+    let dependency = ""
+
+    if has-dependencies {
+      dependency = box(width: max-dep-width + 1em)[#dep]
+      tmpWidth = measure[#dependency #index #bl].width
+    } else {
+      tmpWidth = measure[#index #bl].width
+    }
+    maxWidth = calc.max(maxWidth, tmpWidth)
+
+    let numInset = (x: 0pt, y: 5pt)
+
+    let line = ""
+    if has-dependencies {
+      line = box[#box(inset: numInset)[#dependency #index] #bl]
+    } else {
+      line = box[#box(inset: numInset)[#index] #bl]
+    }
+
+    rule = box(baseline: -0.5em, rule)
+    tupArr.push((line, rule, indent))
+    i += 1
+  }
+  let v = 0.2pt + blue
+  let st = (right: v, left: v, top: v, bottom: v)
+  tupArr = tupArr.map(a => [#box(stroke: st, width: maxWidth, a.at(0)) #h(
+      1em,
+    ) #a.at(
+      1,
+    ) #h(1em) #text(fill: purple, [#a.at(2)])]) // TODO: REMOVE DEBUGGING
+
+  block(
+    align(
+      start,
+      stack(dir: ttb, spacing: 0em, ..tupArr),
+    ),
+  )
+}
+
 
 #let ded-nat(
   stcolor: black,
