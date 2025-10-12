@@ -16,6 +16,7 @@ This package provides two functions:
 - `style-dep`: the styling function that will be applied to the dependencies. Optional: Default is `content => text(style: "italic", content)`.
 - `style-formula`: the styling function that will be applied to the formula. Optional: Default is `content => content`.
 - `style-rule`: the styling function that will be applied to the rule. Optional: Default is `content => text(style: "bold", content)`.
+- `nested-boxes`: instead of using indentation lines, use nested boxes. Optional: Default is `false`.
 
 `ded-nat-boxed` is a function that returns the deduction in a `box` and expects:
 - `stcolor`: the stroke color of the indentation guides. Optional: Default is `black`.
@@ -27,6 +28,7 @@ This package provides two functions:
 - `style-dep`: the styling function that will be applied to the dependencies. Optional: Default is `content => text(style: "italic", content)`.
 - `style-formula`: the styling function that will be applied to the formula. Optional: Default is `content => content`.
 - `style-rule`: the styling function that will be applied to the rule. Optional: Default is `content => text(style: "bold", content)`.
+- `nested-boxes`: instead of using indentation lines, use nested boxes. Optional: Default is `false`.
 
 
 > Note: depending on your layout, this functions may fail to compile due to a high enough amount of indentation (due to the recursive implementation of the layout).

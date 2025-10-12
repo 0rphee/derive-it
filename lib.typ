@@ -8,6 +8,7 @@
 - `style-dep`: the styling function that will be applied to the dependencies. Optional: Default is `content => text(style: "italic", content)`.
 - `style-formula`: the styling function that will be applied to the formula. Optional: Default is `content => content`.
 - `style-rule`: the styling function that will be applied to the rule. Optional: Default is `content => text(style: "bold", content)`.
+- `nested-boxes`: instead of using indentation lines, use nested boxes. Optional: Default is `false`.
 
 */
 
@@ -160,118 +161,6 @@
   )
 }
 
-#let ded-nat-alt(
-  stcolor: black,
-  arr: array,
-  style-dep: derive-it-internal-default-style-dep,
-  style-formula: derive-it-internal-default-style-formula,
-  style-rule: derive-it-internal-default-style-rule,
-) = context {
-  assert(type(arr) == array, message: "The input must be an array.")
-
-  // validate the input and obtain metrics
-  let (
-    has-dependencies,
-    line-size,
-    max-dep-width,
-    max-indent-level,
-    max-formula-width,
-    arr,
-  ) = derive-it-internal-array-checks(arr, style-dep, style-formula, style-rule)
-
-  let maxWidth = 0pt
-  let tupArr = ()
-  let i = 0
-  while i < arr.len() {
-    if not has-dependencies {
-      arr.at(i).insert(0, none)
-    }
-    let (dep, indent, formula, rule) = arr.at(i)
-
-    // +1 -> more indented
-    // -1 -> less indented
-    // 0  -> equally indented
-    let prev-indentation-diff = if (i == 0) { -1 } else {
-      // previous line arrays always have 4 elements (dep=none)
-      arr.at(i - 1).at(1) - indent
-    }
-    let next-indentation-diff = if (arr.len() <= i + 1) { -1 } else {
-      let ix = if has-dependencies { 1 } else { 0 }
-      arr.at(i + 1).at(ix) - indent
-    }
-
-    let bl = formula
-
-    ///////////////////////// FOR /////////////////////////////
-    for indent-index in range(0, max-indent-level + 1) {
-      let stroke = (top: 0pt, right: 0pt, bottom: 0pt, left: 0pt)
-      let strength = if (indent >= max-indent-level - indent-index) {
-        1pt
-      } else { 0.0pt } // 'else' branch for debugging
-      // current level of indentation needs box stroke
-      let stroke-line-config = strength + stcolor
-
-      if (indent == (max-indent-level - indent-index)) {
-        // we're in the box that corresponds to the indentation of this formula
-        if prev-indentation-diff <= -1 {
-          // if the previous formula is in a lower indentation level
-          stroke.top = stroke-line-config
-        }
-        if next-indentation-diff <= -1 {
-          // if the next formula is in a lower indentation level
-          stroke.bottom = stroke-line-config
-        }
-      }
-      stroke.left = stroke-line-config
-      stroke.right = stroke-line-config
-
-      let rect-width = if (indent-index == 0) {
-        max-formula-width + 10pt // 5pt each for left & right
-      } else {
-        auto
-      }
-
-      let extra-spacing = if (indent-index == max-indent-level) { 0em } else {
-        1em
-      }
-
-      bl = [#box(inset: (x: extra-spacing, y: 0pt))[#rect(
-        stroke: stroke,
-        inset: if indent-index == 0 { 5pt } else { 0pt },
-        width: rect-width,
-      )[#bl]]]
-    }
-    ///////////////////////// FOR /////////////////////////////
-
-    let line-index-content = box(width: 1.5em)[#(i + 1).]
-
-    let numInset = (x: 0pt, y: 5pt)
-    let line = if has-dependencies {
-      let dependency = box(width: max-dep-width + 1em)[#dep]
-      let l = box[#box(inset: numInset)[#dependency #line-index-content] #bl]
-      maxWidth = calc.max(maxWidth, measure(l).width)
-      l
-    } else {
-      let l = box[#box(inset: numInset)[#line-index-content] #bl]
-      maxWidth = calc.max(maxWidth, measure(l).width)
-      l
-    }
-
-    rule = box(baseline: -0.5em, rule)
-    tupArr.push((line, rule, indent))
-    i += 1
-  }
-  tupArr = tupArr.map(a => [#box(width: maxWidth, a.at(0)) #h(1em) #a.at(1)])
-
-  block(
-    align(
-      start,
-      stack(..tupArr),
-    ),
-  )
-}
-
-
 #let ded-nat(
   stcolor: black,
   arr: array,
@@ -366,30 +255,37 @@
       }
 
       let rect-inset = if indent-index == 0 { 5pt } else { 0pt }
-      bl = box(stroke: 0.1pt+blue, inset: external-box-inset, rect(
+      // add stroke for debugging
+      bl = box(/* stroke: 0.0pt + blue, */ inset: external-box-inset, rect(
         stroke: stroke,
         inset: rect-inset,
         width: rect-width,
         bl,
       ))
     }
-    ///////////////////////// FOR /////////////////////////////
+    ///////////////////////// END FOR /////////////////////////////
 
     let line-index-content = box(width: 1.5em)[#(i + 1).]
-    let (ins, numInset) = if not nested-boxes and indent == 0 {
+    let (line-inset, dep-and-number-inset) = if (
+      not nested-boxes and indent == 0
+    ) {
       ((y: 0.5em), 0pt)
     } else {
       (0pt, (y: 5pt))
     }
+
     let line = if has-dependencies {
       let dependency = box(width: max-dep-width + 1em)[#dep]
-      let l = box(inset: ins)[#box(
-          inset: numInset,
+      let l = box(inset: line-inset)[#box(
+          inset: dep-and-number-inset,
         )[#dependency #line-index-content] #bl]
       maxWidth = calc.max(maxWidth, measure(l).width)
       l
     } else {
-      let l = box(inset: ins)[#box(inset: numInset)[#line-index-content] #bl]
+      let l = box(inset: line-inset)[#box(
+          inset: dep-and-number-inset,
+          line-index-content,
+        ) #bl]
       maxWidth = calc.max(maxWidth, measure(l).width)
       l
     }
@@ -420,6 +316,7 @@
 - `style-dep`: the styling function that will be applied to the dependencies. Optional: Default is `content => text(style: "italic", content)`.
 - `style-formula`: the styling function that will be applied to the formula. Optional: Default is `content => content`.
 - `style-rule`: the styling function that will be applied to the rule. Optional: Default is `content => text(style: "bold", content)`.
+- `nested-boxes`: instead of using indentation lines, use nested boxes. Optional: Default is `false`.
 
 */
 
